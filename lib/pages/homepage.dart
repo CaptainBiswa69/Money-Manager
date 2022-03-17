@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/controller/db_helper.dart';
@@ -15,9 +17,7 @@ class _HomePageState extends State<HomePage> {
   DbHelper helper = DbHelper();
 
   int totalBalance = 0;
-
   int totalIncome = 0;
-
   int totalExpense = 0;
 
   getTotalBalnace(Map entireData) {
@@ -35,6 +35,21 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
+
+  List<String> months = [
+    "JAN",
+    "FEB",
+    "MAR",
+    "APR",
+    "MAY",
+    "JUN",
+    "JUL",
+    "AUG",
+    "SEP",
+    "OCT",
+    "NOV",
+    "DEC"
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +115,7 @@ class _HomePageState extends State<HomePage> {
                             "Total Balance",
                             style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 24.0,
+                                fontSize: 28.0,
                                 fontWeight: FontWeight.bold),
                           ),
                           Padding(
@@ -109,12 +124,12 @@ class _HomePageState extends State<HomePage> {
                               "Rs $totalBalance",
                               style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 20.0,
+                                  fontSize: 24.0,
                                   fontWeight: FontWeight.bold),
                             ),
                           ),
                           const SizedBox(
-                            height: 20,
+                            height: 30,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,7 +141,31 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                  )
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Text(
+                      "Transactions",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        Map dataIndex = snapshot.data![index];
+                        if (dataIndex['type'] == "Income") {
+                          return incomeTile(dataIndex['amount'],
+                              dataIndex['note'], dataIndex['date']);
+                        } else {
+                          return expenseTile(dataIndex['amount'],
+                              dataIndex['note'], dataIndex['date']);
+                        }
+                      })
                 ],
               );
             } else {
@@ -137,78 +176,160 @@ class _HomePageState extends State<HomePage> {
           }),
     );
   }
-}
 
-Widget incomeCard(String value) {
-  return Row(
-    children: [
-      Container(
-        decoration:
-            const BoxDecoration(shape: BoxShape.circle, color: Colors.white70),
-        padding: const EdgeInsets.all(12.0),
-        child: const Icon(
-          CupertinoIcons.arrow_down,
-          color: Colors.green,
-          size: 24,
+  Widget incomeCard(String value) {
+    return Row(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle, color: Colors.white70),
+          padding: const EdgeInsets.all(12.0),
+          child: const Icon(
+            CupertinoIcons.arrow_down,
+            color: Colors.green,
+            size: 24,
+          ),
         ),
-      ),
-      const SizedBox(
-        width: 10,
-      ),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        const SizedBox(
+          width: 10,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Income",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Text(
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 20),
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget expenseCard(String value) {
+    return Row(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle, color: Colors.white70),
+          padding: const EdgeInsets.all(12.0),
+          child: const Icon(
+            CupertinoIcons.arrow_up,
+            color: Colors.red,
+            size: 24,
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Expense",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Text(
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 20),
+            )
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget incomeTile(int value, String note, DateTime date) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+          color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Income",
-            style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+          Row(children: [
+            const Icon(
+              CupertinoIcons.arrow_down,
+              color: Colors.green,
+              size: 30,
+            ),
+            const SizedBox(
+              width: 5,
+            ),
+            Text(
+              "${date.day} ${months[date.month - 1]} ${date.year}",
+              style: const TextStyle(
+                  color: Colors.green,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold),
+            ),
+          ]),
+          Row(
+            children: [
+              Text("+ $value",
+                  style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold))
+            ],
           )
         ],
       ),
-    ],
-  );
-}
+    );
+  }
 
-Widget expenseCard(String value) {
-  return Row(
-    children: [
-      Container(
-        decoration:
-            const BoxDecoration(shape: BoxShape.circle, color: Colors.white70),
-        padding: const EdgeInsets.all(12.0),
-        child: const Icon(
-          CupertinoIcons.arrow_up,
-          color: Colors.red,
-          size: 24,
-        ),
-      ),
-      const SizedBox(
-        width: 10,
-      ),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget expenseTile(int value, String note, DateTime date) {
+    return Container(
+      padding: const EdgeInsets.all(12.0),
+      margin: const EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+          color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Expense",
-            style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+          Row(children: [
+            const Icon(
+              CupertinoIcons.arrow_up,
+              color: Colors.red,
+              size: 30,
+            ),
+            const SizedBox(
+              width: 5,
+            ),
+            Text(
+              "${date.day} ${months[date.month - 1]} ${date.year}",
+              style: const TextStyle(
+                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ]),
+          Row(
+            children: [
+              Text("- $value",
+                  style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold))
+            ],
           )
         ],
       ),
-    ],
-  );
+    );
+  }
 }
