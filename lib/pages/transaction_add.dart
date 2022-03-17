@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_3/controller/db_helper.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 
 class AddTransaction extends StatefulWidget {
@@ -30,11 +31,13 @@ class _AddTransactionState extends State<AddTransaction> {
     "December"
   ];
   Future<void> _selectedDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: selectedDate,
-        firstDate: DateTime(2019, 1),
-        lastDate: DateTime(2100, 12)) as DateTime;
+    var showDatePicker2 = showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2019, 1),
+      lastDate: DateTime(2100, 12),
+    );
+    final DateTime? picked = await showDatePicker2;
 
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -75,7 +78,7 @@ class _AddTransactionState extends State<AddTransaction> {
               ),
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(hintText: "0"),
+                  decoration: const InputDecoration(hintText: "Amount"),
                   style: const TextStyle(fontSize: 20),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -212,8 +215,12 @@ class _AddTransactionState extends State<AddTransaction> {
             height: 20,
           ),
           ElevatedButton(
-              onPressed: () {
-                print(type);
+              onPressed: () async {
+                if (amount != null && note.isNotEmpty) {
+                  DbHelper helper = DbHelper();
+                  await helper.addData(amount!, selectedDate, note, type);
+                }
+                Navigator.of(context).pop();
               },
               child: const Text(
                 "Add",
