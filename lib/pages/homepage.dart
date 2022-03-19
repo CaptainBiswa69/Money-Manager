@@ -1,10 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/controller/db_helper.dart';
+import 'package:flutter_application_3/models/transaction_model.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 import 'package:flutter_application_3/pages/transaction_add.dart';
+import 'package:flutter_application_3/widgets/confirm_dialog.dart';
+import 'package:hive/hive.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -15,26 +16,41 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DbHelper helper = DbHelper();
-
+  late Box box;
   int totalBalance = 0;
   int totalIncome = 0;
   int totalExpense = 0;
+  DateTime day = DateTime.now();
 
-  getTotalBalnace(Map entireData) {
+  getTotalBalnace(List<TransactionModel> entireData) {
     totalIncome = 0;
     totalBalance = 0;
     totalExpense = 0;
-    entireData.forEach((key, value) {
-      if (value['type'] == "Income") {
-        totalBalance += value['amount'] as int;
-        totalIncome += value['amount'] as int;
+    for (TransactionModel data in entireData) {
+      if (data.type == "Income") {
+        totalBalance += data.amount;
+        totalIncome += data.amount;
+      } else {
+        totalBalance -= data.amount;
+        totalExpense += data.amount;
       }
-      if (value['type'] == "Expense") {
-        totalBalance = totalBalance - value['amount'] as int;
-        totalExpense += value['amount'] as int;
-      }
-    });
+    }
   }
+
+  List<String> month = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
 
   List<String> months = [
     "JAN",
@@ -50,6 +66,25 @@ class _HomePageState extends State<HomePage> {
     "NOV",
     "DEC"
   ];
+
+  Future<List<TransactionModel>> fetch() async {
+    if (box.values.isEmpty) {
+      return Future.value([]);
+    } else {
+      List<TransactionModel> items = [];
+      box.toMap().values.forEach((element) {
+        items.add(TransactionModel(element['amount'] as int,
+            element['date'] as DateTime, element['note'], element['type']));
+      });
+      return items;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    box = Hive.box("Money");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +119,8 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Static.PrimaryColor,
       ),
-      body: FutureBuilder<Map>(
-          future: helper.fetch(),
+      body: FutureBuilder<List<TransactionModel>>(
+          future: fetch(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return const Center(
@@ -100,7 +135,10 @@ class _HomePageState extends State<HomePage> {
               return ListView(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 12.0,
+                    ),
                     child: Container(
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
@@ -152,20 +190,49 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ChoiceChip(
+                            label: Text(month[day.month - 2],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                )),
+                            selected: false),
+                        ChoiceChip(
+                            label: Text(month[day.month - 1],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                )),
+                            selected: true),
+                        const ChoiceChip(
+                            label: Text("Custom",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                )),
+                            selected: false),
+                      ],
+                    ),
+                  ),
                   ListView.builder(
                       shrinkWrap: true,
                       itemCount: snapshot.data!.length,
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        Map dataIndex = snapshot.data![index];
-                        if (dataIndex['type'] == "Income") {
-                          return incomeTile(dataIndex['amount'],
-                              dataIndex['note'], dataIndex['date']);
+                        TransactionModel dataIndex = snapshot.data![index];
+                        if (dataIndex.type == "Income") {
+                          return incomeTile(dataIndex.amount, dataIndex.note,
+                              dataIndex.date, index);
                         } else {
-                          return expenseTile(dataIndex['amount'],
-                              dataIndex['note'], dataIndex['date']);
+                          return expenseTile(dataIndex.amount, dataIndex.note,
+                              dataIndex.date, index);
                         }
-                      })
+                      }),
+                  const SizedBox(
+                    height: 50,
+                  ),
                 ],
               );
             } else {
@@ -255,80 +322,153 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget incomeTile(int value, String note, DateTime date) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      margin: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-          color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(children: [
-            const Icon(
-              CupertinoIcons.arrow_down,
-              color: Colors.green,
-              size: 30,
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            Text(
-              "${date.day} ${months[date.month - 1]} ${date.year}",
-              style: const TextStyle(
-                  color: Colors.green,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            ),
-          ]),
-          Row(
-            children: [
-              Text("+ $value",
-                  style: const TextStyle(
+  Widget incomeTile(int value, String note, DateTime date, int index) {
+    return InkWell(
+      onLongPress: () async {
+        bool? answer = await showConfirmDialog(
+            context, "Warning", "Do you want to delete this record?");
+        if (answer != null && answer) {
+          helper.deleteData(index);
+          setState(() {});
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10.0),
+        margin: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+            color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(children: [
+              const Icon(
+                CupertinoIcons.arrow_down_circle,
+                color: Colors.green,
+                size: 30,
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Income",
+                    style: TextStyle(
                       color: Colors.green,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold))
-            ],
-          )
-        ],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    "${date.day} ${months[date.month - 1]} ${date.year}",
+                    style: const TextStyle(
+                        color: Colors.green,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ]),
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Text("+ $value",
+                        style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold)),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      note,
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                  ],
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
-  Widget expenseTile(int value, String note, DateTime date) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      margin: const EdgeInsets.all(10.0),
-      decoration: BoxDecoration(
-          color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(children: [
-            const Icon(
-              CupertinoIcons.arrow_up,
-              color: Colors.red,
-              size: 30,
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            Text(
-              "${date.day} ${months[date.month - 1]} ${date.year}",
-              style: const TextStyle(
-                  color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-          ]),
-          Row(
-            children: [
-              Text("- $value",
-                  style: const TextStyle(
+  Widget expenseTile(int value, String note, DateTime date, int index) {
+    return InkWell(
+      onLongPress: () async {
+        bool? answer = await showConfirmDialog(
+            context, "Warning", "Do you want to delete this record?");
+        if (answer != null && answer) {
+          helper.deleteData(index);
+          setState(() {});
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10.0),
+        margin: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+            color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(children: [
+              const Icon(
+                CupertinoIcons.arrow_up_circle,
+                color: Colors.red,
+                size: 30,
+              ),
+              const SizedBox(
+                width: 5,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Expense",
+                    style: TextStyle(
                       color: Colors.red,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold))
-            ],
-          )
-        ],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    "${date.day} ${months[date.month - 1]} ${date.year}",
+                    style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ]),
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Text("- $value",
+                        style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold)),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Text(note, style: const TextStyle(fontSize: 15)),
+                  ],
+                )
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

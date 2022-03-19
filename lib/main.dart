@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_3/myTheme.dart';
 import 'package:flutter_application_3/pages/homepage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hive/hive.dart';
 
 void main() async {
   await Hive.initFlutter();
@@ -22,8 +21,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: AnimatedSplashScreen(
             backgroundColor: Colors.white,
-            splash: Image.asset("assets/images/ManagerR.gif"),
+            splash: Image.asset("assets/images/manager_R.gif"),
             splashIconSize: 300,
-            nextScreen: HomePage()));
+            nextScreen: const HomePage()));
   }
 }
