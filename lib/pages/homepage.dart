@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   int totalIncome = 0;
   int totalExpense = 0;
   DateTime day = DateTime.now();
+  int choicevalue = DateTime.now().month - 1;
 
   getTotalBalnace(List<TransactionModel> entireData) {
     totalIncome = 0;
@@ -196,23 +197,59 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ChoiceChip(
-                            label: Text(month[day.month - 2],
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                )),
-                            selected: false),
+                          label: Text(month[day.month - 2],
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: choicevalue == day.month - 2
+                                    ? Colors.white
+                                    : Colors.black,
+                              )),
+                          selected: choicevalue == day.month - 2 ? true : false,
+                          selectedColor: Static.PrimaryColor,
+                          onSelected: (val) {
+                            if (val) {
+                              setState(() {
+                                choicevalue = day.month - 2;
+                              });
+                            }
+                          },
+                        ),
                         ChoiceChip(
-                            label: Text(month[day.month - 1],
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                )),
-                            selected: true),
-                        const ChoiceChip(
-                            label: Text("Custom",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                )),
-                            selected: false),
+                          label: Text(month[day.month - 1],
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: choicevalue == day.month - 1
+                                    ? Colors.white
+                                    : Colors.black,
+                              )),
+                          selected: choicevalue == day.month - 1 ? true : false,
+                          selectedColor: Static.PrimaryColor,
+                          onSelected: (val) {
+                            if (val) {
+                              setState(() {
+                                choicevalue = day.month - 1;
+                              });
+                            }
+                          },
+                        ),
+                        ChoiceChip(
+                          label: Text("Overall",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: choicevalue == 13
+                                    ? Colors.white
+                                    : Colors.black,
+                              )),
+                          selected: choicevalue == 13 ? true : false,
+                          selectedColor: Static.PrimaryColor,
+                          onSelected: (val) {
+                            if (val) {
+                              setState(() {
+                                choicevalue = 13;
+                              });
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -222,12 +259,39 @@ class _HomePageState extends State<HomePage> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         TransactionModel dataIndex = snapshot.data![index];
-                        if (dataIndex.type == "Income") {
-                          return incomeTile(dataIndex.amount, dataIndex.note,
-                              dataIndex.date, index);
+                        // if (dataIndex.type == "Income") {
+                        //   if (dataIndex.date.month == choicevalue + 1) {
+                        //     return incomeTile(dataIndex.amount, dataIndex.note,
+                        //         dataIndex.date, index);
+                        //   } else {
+                        //     return const Text("No data");
+                        //   }
+                        // } else {
+                        //   if (dataIndex.date.month == choicevalue + 1) {
+                        //     return expenseTile(dataIndex.amount, dataIndex.note,
+                        //         dataIndex.date, index);
+                        //   } else {
+                        //     return const Text("No data");
+                        //   }
+                        // }
+                        if (dataIndex.date.month == choicevalue + 1) {
+                          if (dataIndex.type == "Income") {
+                            return incomeTile(dataIndex.amount, dataIndex.note,
+                                dataIndex.date, index);
+                          } else {
+                            return expenseTile(dataIndex.amount, dataIndex.note,
+                                dataIndex.date, index);
+                          }
+                        } else if (choicevalue == 13) {
+                          if (dataIndex.type == "Income") {
+                            return incomeTile(dataIndex.amount, dataIndex.note,
+                                dataIndex.date, index);
+                          } else {
+                            return expenseTile(dataIndex.amount, dataIndex.note,
+                                dataIndex.date, index);
+                          }
                         } else {
-                          return expenseTile(dataIndex.amount, dataIndex.note,
-                              dataIndex.date, index);
+                          return Container();
                         }
                       }),
                   const SizedBox(
