@@ -23,6 +23,11 @@ class _HomePageState extends State<HomePage> {
   DateTime day = DateTime.now();
   int choicevalue = DateTime.now().month - 1;
 
+  DateTimeRange dateTimeRange = DateTimeRange(
+      start: DateTime(DateTime.now().year, DateTime.now().month - 1,
+          DateTime.now().day - 3),
+      end: DateTime.now());
+
   getTotalBalnace(List<TransactionModel> entireData) {
     totalIncome = 0;
     totalBalance = 0;
@@ -77,7 +82,8 @@ class _HomePageState extends State<HomePage> {
         items.add(TransactionModel(element['amount'] as int,
             element['date'] as DateTime, element['note'], element['type']));
       });
-      return items;
+      List<TransactionModel> rev = items.reversed.toList();
+      return rev;
     }
   }
 
@@ -181,14 +187,57 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: Text(
-                      "Transactions",
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Transactions",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            Row(
+                              children: [
+                                InkWell(
+                                  onTap: (() => openDialog(context)),
+                                  child: const Icon(
+                                    CupertinoIcons.calendar_circle,
+                                    color: Static.PrimaryColor,
+                                    size: 40,
+                                  ),
+                                ),
+                                ChoiceChip(
+                                  label: Text("Filter",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: choicevalue == 100
+                                            ? Colors.white
+                                            : Colors.black,
+                                      )),
+                                  selected: choicevalue == 100 ? true : false,
+                                  selectedColor: Static.PrimaryColor,
+                                  onSelected: (val) {
+                                    if (val) {
+                                      setState(() {
+                                        choicevalue = 100;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Text("1. Press calender to select range."),
+                        const Text("2. Press filter to see filtered data."),
+                        const Text("3. Longpress to delete.")
+                      ],
                     ),
                   ),
                   Padding(
@@ -289,6 +338,29 @@ class _HomePageState extends State<HomePage> {
                           } else {
                             return expenseTile(dataIndex.amount, dataIndex.note,
                                 dataIndex.date, index);
+                          }
+                        } else if (choicevalue == 100) {
+                          if (dateTimeRange.start == dataIndex.date ||
+                              dateTimeRange.end == dataIndex.date) {
+                            if (dataIndex.type == "Income") {
+                              return incomeTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            } else {
+                              return expenseTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            }
+                          } else if (dateTimeRange.start
+                                  .isBefore(dataIndex.date) &&
+                              dateTimeRange.end.isAfter(dataIndex.date)) {
+                            if (dataIndex.type == "Income") {
+                              return incomeTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            } else {
+                              return expenseTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            }
+                          } else {
+                            return Container();
                           }
                         } else {
                           return Container();
@@ -536,4 +608,63 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  Future openDialog(context) => showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) => AlertDialog(
+            title: const Text("Pick Range"),
+            content: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    DateTimeRange? n = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        initialDateRange: dateTimeRange);
+                    if (n != null) {
+                      setState(() => dateTimeRange = n);
+                    }
+                  },
+                  child: Text(
+                    "${dateTimeRange.start.day} ${dateTimeRange.start.month} ${dateTimeRange.start.year}",
+                  ),
+                ),
+                const Icon(CupertinoIcons.arrow_right),
+                ElevatedButton(
+                  onPressed: () async {
+                    DateTimeRange? n = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        initialDateRange: dateTimeRange);
+                    if (n != null) {
+                      setState(() => dateTimeRange = n);
+                    }
+                  },
+                  child: Text(
+                      "${dateTimeRange.end.day} ${dateTimeRange.end.month} ${dateTimeRange.end.year}"),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.red)),
+                child: const Text("yes"),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  child: const Text("No"))
+            ],
+          ),
+        ),
+      );
 }
