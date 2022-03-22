@@ -1,4 +1,4 @@
-# flutter_application_3
+# Money Manager
 
 A new Flutter project.
 
