@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/controller/db_helper.dart';
 import 'package:flutter_application_3/models/transaction_model.dart';
+import 'package:flutter_application_3/pages/fingerprint_auth.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 import 'package:flutter_application_3/pages/transaction_add.dart';
 import 'package:flutter_application_3/widgets/confirm_dialog.dart';
@@ -225,7 +226,12 @@ class _HomePageState extends State<HomePage> {
                             Row(
                               children: [
                                 InkWell(
-                                  onTap: (() => openDialog(context)),
+                                  onTap: () {
+                                    openDialog(context);
+                                    setState(() {
+                                      choicevalue = 13;
+                                    });
+                                  },
                                   child: const Icon(
                                     CupertinoIcons.calendar_circle,
                                     color: Static.PrimaryColor,
