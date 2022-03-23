@@ -1,6 +1,6 @@
 # Money Manager
 
-A new Flutter project.
+Simple Money Manager to keep track of your transactions.
 
 ## Getting Started
 
