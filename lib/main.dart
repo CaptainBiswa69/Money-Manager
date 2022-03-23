@@ -1,6 +1,7 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/myTheme.dart';
+import 'package:flutter_application_3/pages/fingerprint.dart';
 import 'package:flutter_application_3/pages/fingerprint_auth.dart';
 import 'package:flutter_application_3/pages/homepage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
