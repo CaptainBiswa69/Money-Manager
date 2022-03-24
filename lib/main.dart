@@ -4,6 +4,7 @@ import 'package:flutter_application_3/myTheme.dart';
 import 'package:flutter_application_3/pages/fingerprint.dart';
 import 'package:flutter_application_3/pages/fingerprint_auth.dart';
 import 'package:flutter_application_3/pages/homepage.dart';
+import 'package:flutter_application_3/pages/namepage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
@@ -25,6 +26,6 @@ class MyApp extends StatelessWidget {
             backgroundColor: Colors.white,
             splash: Image.asset("assets/images/manager_R.gif"),
             splashIconSize: 300,
-            nextScreen: FingerprintAuth()));
+            nextScreen: NamePAge()));
   }
 }

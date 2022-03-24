@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_3/controller/db_helper.dart';
 import 'package:flutter_application_3/models/transaction_model.dart';
 import 'package:flutter_application_3/pages/fingerprint_auth.dart';
+import 'package:flutter_application_3/pages/settings.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 import 'package:flutter_application_3/pages/transaction_add.dart';
 import 'package:flutter_application_3/widgets/confirm_dialog.dart';
@@ -23,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   int totalExpense = 0;
   DateTime day = DateTime.now();
   int choicevalue = DateTime.now().month - 1;
+  String name = "";
 
   DateTimeRange dateTimeRange = DateTimeRange(
       start: DateTime(DateTime.now().year, DateTime.now().month - 1,
@@ -99,7 +101,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
           title: const Text(
-            "Money Manager",
+            "Hello, Biswajeet",
             style: TextStyle(color: Colors.white),
           ),
           actions: [
@@ -108,7 +110,10 @@ class _HomePageState extends State<HomePage> {
                 Icons.settings,
                 color: Colors.white,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => Settings()));
+              },
             ),
           ]),
       backgroundColor: const Color(0xffe2e7ef),
@@ -147,64 +152,72 @@ class _HomePageState extends State<HomePage> {
                       horizontal: 10.0,
                       vertical: 12.0,
                     ),
-                    child: Container(
-                      padding: const EdgeInsets.all(20.0),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10.0),
-                            topRight: Radius.circular(10.0),
-                            bottomLeft: Radius.circular(10.0),
-                            bottomRight: Radius.circular(10.0),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.greenAccent,
-                              offset: const Offset(
-                                5.0,
-                                5.0,
-                              ),
-                              blurRadius: 10.0,
-                              spreadRadius: 2.0,
-                            ), //BoxShadow
-                            BoxShadow(
-                              color: Colors.white,
-                              offset: const Offset(0.0, 0.0),
-                              blurRadius: 0.0,
-                              spreadRadius: 0.0,
-                            ), //BoxShadow
-                          ],
-                          gradient: const LinearGradient(
-                              colors: [Static.PrimaryColor, Colors.green])),
-                      child: Column(
-                        children: [
-                          const Text(
-                            "Total Balance",
-                            style: TextStyle(
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side:
+                            BorderSide(color: Static.PrimaryColor, width: 1.5),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.greenAccent,
+                                offset: const Offset(
+                                  5.0,
+                                  5.0,
+                                ),
+                                blurRadius: 10.0,
+                                spreadRadius: 2.0,
+                              ), //BoxShadow
+                              BoxShadow(
                                 color: Colors.white,
-                                fontSize: 28.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Rs $totalBalance",
-                              style: const TextStyle(
+                                offset: const Offset(0.0, 0.0),
+                                blurRadius: 0.0,
+                                spreadRadius: 0.0,
+                              ), //BoxShadow
+                            ],
+                            gradient: const LinearGradient(
+                                colors: [Static.PrimaryColor, Colors.green])),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Total Balance",
+                              style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24.0,
+                                  fontSize: 32.0,
                                   fontWeight: FontWeight.bold),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              incomeCard(totalIncome.toString()),
-                              expenseCard(totalExpense.toString())
-                            ],
-                          )
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Rs $totalBalance",
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 50,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                incomeCard(totalIncome.toString()),
+                                expenseCard(totalExpense.toString())
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -241,7 +254,7 @@ class _HomePageState extends State<HomePage> {
                                 ChoiceChip(
                                   label: Text("Filter",
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 22,
                                         color: choicevalue == 100
                                             ? Colors.white
                                             : Colors.black,
@@ -274,7 +287,7 @@ class _HomePageState extends State<HomePage> {
                         ChoiceChip(
                           label: Text(month[day.month - 2],
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 22,
                                 color: choicevalue == day.month - 2
                                     ? Colors.white
                                     : Colors.black,
@@ -292,7 +305,7 @@ class _HomePageState extends State<HomePage> {
                         ChoiceChip(
                           label: Text(month[day.month - 1],
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 22,
                                 color: choicevalue == day.month - 1
                                     ? Colors.white
                                     : Colors.black,
@@ -310,7 +323,7 @@ class _HomePageState extends State<HomePage> {
                         ChoiceChip(
                           label: Text("Overall",
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 22,
                                 color: choicevalue == 13
                                     ? Colors.white
                                     : Colors.black,
@@ -494,68 +507,74 @@ class _HomePageState extends State<HomePage> {
           setState(() {});
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(10.0),
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-            color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(children: [
-              const Icon(
-                CupertinoIcons.arrow_down_circle,
-                color: Colors.green,
-                size: 30,
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Income",
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "${date.day} ${months[date.month - 1]} ${date.year}",
-                    style: const TextStyle(
-                        color: Colors.green,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ]),
-            Row(
-              children: [
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          side: BorderSide(color: Static.PrimaryColor, width: 1.5),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          margin: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(color: Colors.white60),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                const Icon(
+                  CupertinoIcons.arrow_down_circle,
+                  color: Colors.green,
+                  size: 30,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("+ $value",
-                        style: const TextStyle(
-                            color: Colors.green,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold)),
+                    const Text(
+                      "Income",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(
                       height: 5,
                     ),
                     Text(
-                      note,
-                      style: const TextStyle(fontSize: 15),
+                      "${date.day} ${months[date.month - 1]} ${date.year}",
+                      style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
-                )
-              ],
-            )
-          ],
+                ),
+              ]),
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Text("+ $value",
+                          style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        note,
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -571,65 +590,71 @@ class _HomePageState extends State<HomePage> {
           setState(() {});
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(10.0),
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-            color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(children: [
-              const Icon(
-                CupertinoIcons.arrow_up_circle,
-                color: Colors.red,
-                size: 30,
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Expense",
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "${date.day} ${months[date.month - 1]} ${date.year}",
-                    style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ]),
-            Row(
-              children: [
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          side: BorderSide(color: Static.PrimaryColor, width: 1.5),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          margin: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(color: Colors.white60),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                const Icon(
+                  CupertinoIcons.arrow_up_circle,
+                  color: Colors.red,
+                  size: 30,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("- $value",
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold)),
+                    const Text(
+                      "Expense",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(
                       height: 5,
                     ),
-                    Text(note, style: const TextStyle(fontSize: 15)),
+                    Text(
+                      "${date.day} ${months[date.month - 1]} ${date.year}",
+                      style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ],
-                )
-              ],
-            )
-          ],
+                ),
+              ]),
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Text("- $value",
+                          style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(note, style: const TextStyle(fontSize: 15)),
+                    ],
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
