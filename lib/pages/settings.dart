@@ -35,13 +35,16 @@ class _SettingsState extends State<Settings> {
                 leading: Icon(Icons.portrait),
                 title: Text('Name'),
                 value: Text('${name}'),
-                onPressed: (context) {},
+                onPressed: (context) => openDailog().whenComplete(() {
+                  setState(() {
+                    _getName();
+                  });
+                }),
               ),
               SettingsTile.switchTile(
                 onToggle: (value) {
                   setState(() {
                     _setAuthtoogle(value);
-                    print(value);
                   });
                 },
                 initialValue: authentication_enable,
@@ -73,5 +76,33 @@ class _SettingsState extends State<Settings> {
   void _getAuthToogle() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     authentication_enable = prefs.getBool("AuthToogle")!;
+  }
+
+  Future openDailog() => showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: Text("Change Your Name"),
+            content: TextField(
+              onChanged: (value) {
+                if (value.isNotEmpty) {
+                  add(value);
+                }
+              },
+              decoration: InputDecoration(
+                hintText: "Enter Your Name",
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("SUBMIT"))
+            ],
+          ));
+
+  add(String value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("Name", value);
   }
 }

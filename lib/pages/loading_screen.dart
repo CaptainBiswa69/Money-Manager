@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/pages/fingerprint_auth.dart';
-import 'package:flutter_application_3/pages/homepage.dart';
 import 'package:flutter_application_3/pages/namepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

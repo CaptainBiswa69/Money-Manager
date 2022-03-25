@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/controller/db_helper.dart';
 import 'package:flutter_application_3/models/transaction_model.dart';
-import 'package:flutter_application_3/pages/fingerprint_auth.dart';
 import 'package:flutter_application_3/pages/settings.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 import 'package:flutter_application_3/pages/transaction_add.dart';
@@ -30,8 +29,7 @@ class _HomePageState extends State<HomePage> {
   DateTimeRange dateTimeRange = DateTimeRange(
       start: DateTime(DateTime.now().year, DateTime.now().month - 1,
           DateTime.now().day - 3),
-      end: DateTime.now());
-
+      end: DateTime.now().add(Duration(days: 2)));
   getTotalBalnace(List<TransactionModel> entireData) {
     totalIncome = 0;
     totalBalance = 0;
@@ -114,7 +112,12 @@ class _HomePageState extends State<HomePage> {
               ),
               onPressed: () {
                 Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => Settings()));
+                    .push(MaterialPageRoute(builder: (context) => Settings()))
+                    .whenComplete(() {
+                  setState(() {
+                    _getName();
+                  });
+                });
               },
             ),
           ]),
@@ -378,8 +381,16 @@ class _HomePageState extends State<HomePage> {
                                 dataIndex.date, index);
                           }
                         } else if (choicevalue == 100) {
-                          if (dateTimeRange.start == dataIndex.date ||
-                              dateTimeRange.end == dataIndex.date) {
+                          print("${dataIndex.amount} ${dataIndex.date}");
+                          if (dateTimeRange.start == dataIndex.date) {
+                            if (dataIndex.type == "Income") {
+                              return incomeTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            } else {
+                              return expenseTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            }
+                          } else if (dateTimeRange.end == dataIndex.date) {
                             if (dataIndex.type == "Income") {
                               return incomeTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);

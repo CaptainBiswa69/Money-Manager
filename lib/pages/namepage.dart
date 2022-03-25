@@ -85,5 +85,6 @@ class _NamePAgeState extends State<NamePAge> {
   Future<void> _addName(String val) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("Name", val);
+    prefs.setBool("AuthToogle", false);
   }
 }
