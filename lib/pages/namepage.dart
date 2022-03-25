@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_3/pages/homepage.dart';
+import 'package:flutter_application_3/pages/fingerprint_auth.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,7 +11,13 @@ class NamePAge extends StatefulWidget {
 }
 
 class _NamePAgeState extends State<NamePAge> {
-  String name = "";
+  String nameCheck = "";
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,8 +52,8 @@ class _NamePAgeState extends State<NamePAge> {
                   ),
                   onChanged: (value) {
                     setState(() {
-                      name = value;
-                      _addName();
+                      _addName(value);
+                      nameCheck = value;
                     });
                   },
                 ),
@@ -59,9 +65,11 @@ class _NamePAgeState extends State<NamePAge> {
                     margin: EdgeInsets.symmetric(horizontal: 20),
                     child: ElevatedButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => HomePage()));
+                          if (nameCheck.isNotEmpty) {
+                            Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (context) => FingerprintAuth()));
+                          }
                         },
                         child: Icon(Icons.arrow_right_alt)),
                   )),
@@ -74,8 +82,8 @@ class _NamePAgeState extends State<NamePAge> {
     );
   }
 
-  Future<void> _addName() async {
+  Future<void> _addName(String val) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("Name", name);
+    prefs.setString("Name", val);
   }
 }

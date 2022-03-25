@@ -8,6 +8,7 @@ import 'package:flutter_application_3/static.dart' as Static;
 import 'package:flutter_application_3/pages/transaction_add.dart';
 import 'package:flutter_application_3/widgets/confirm_dialog.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -94,14 +95,15 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     box = Hive.box("Money");
+    _getName();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
-            "Hello, Biswajeet",
+          title: Text(
+            "Hello, $name",
             style: TextStyle(color: Colors.white),
           ),
           actions: [
@@ -252,6 +254,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 ChoiceChip(
+                                  labelPadding: EdgeInsets.all(2),
                                   label: Text("Filter",
                                       style: TextStyle(
                                         fontSize: 22,
@@ -268,6 +271,8 @@ class _HomePageState extends State<HomePage> {
                                       });
                                     }
                                   },
+                                  elevation: 1,
+                                  padding: EdgeInsets.symmetric(horizontal: 5),
                                 ),
                               ],
                             ),
@@ -285,6 +290,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ChoiceChip(
+                          labelPadding: EdgeInsets.all(2),
                           label: Text(month[day.month - 2],
                               style: TextStyle(
                                 fontSize: 22,
@@ -301,8 +307,11 @@ class _HomePageState extends State<HomePage> {
                               });
                             }
                           },
+                          elevation: 1,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                         ),
                         ChoiceChip(
+                          labelPadding: EdgeInsets.all(2),
                           label: Text(month[day.month - 1],
                               style: TextStyle(
                                 fontSize: 22,
@@ -319,8 +328,11 @@ class _HomePageState extends State<HomePage> {
                               });
                             }
                           },
+                          elevation: 1,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                         ),
                         ChoiceChip(
+                          labelPadding: EdgeInsets.all(2),
                           label: Text("Overall",
                               style: TextStyle(
                                 fontSize: 22,
@@ -337,6 +349,8 @@ class _HomePageState extends State<HomePage> {
                               });
                             }
                           },
+                          elevation: 1,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                         ),
                       ],
                     ),
@@ -347,21 +361,6 @@ class _HomePageState extends State<HomePage> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         TransactionModel dataIndex = snapshot.data![index];
-                        // if (dataIndex.type == "Income") {
-                        //   if (dataIndex.date.month == choicevalue + 1) {
-                        //     return incomeTile(dataIndex.amount, dataIndex.note,
-                        //         dataIndex.date, index);
-                        //   } else {
-                        //     return const Text("No data");
-                        //   }
-                        // } else {
-                        //   if (dataIndex.date.month == choicevalue + 1) {
-                        //     return expenseTile(dataIndex.amount, dataIndex.note,
-                        //         dataIndex.date, index);
-                        //   } else {
-                        //     return const Text("No data");
-                        //   }
-                        // }
                         if (dataIndex.date.month == choicevalue + 1) {
                           if (dataIndex.type == "Income") {
                             return incomeTile(dataIndex.amount, dataIndex.note,
@@ -718,4 +717,11 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       );
+
+  void _getName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString("Name")!;
+    });
+  }
 }

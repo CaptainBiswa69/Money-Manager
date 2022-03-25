@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_3/pages/fingerprint.dart';
 import 'package:flutter_application_3/pages/homepage.dart';
+import 'package:flutter_application_3/pages/namepage.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FingerprintAuth extends StatefulWidget {
   FingerprintAuth({Key? key}) : super(key: key);
@@ -41,7 +43,7 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
   @override
   void initState() {
     super.initState();
-    _authenticate();
+    _fingerprintCheck();
   }
 
   @override
@@ -49,5 +51,16 @@ class _FingerprintAuthState extends State<FingerprintAuth> {
     return SafeArea(
       child: Scaffold(body: Column()),
     );
+  }
+
+  Future _fingerprintCheck() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? value = prefs.getBool("AuthToogle");
+    if (value == false) {
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+    } else {
+      _authenticate();
+    }
   }
 }
