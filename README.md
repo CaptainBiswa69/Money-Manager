@@ -27,6 +27,25 @@ Simple Money Manager to keep track of your transactions. This app helps you with
 
 
 
+## `Features`
+
+`❌` Add Monthly limit and show How much has been spent Yet.
+
+`❌` Show Charts of Money Spent on each day
+
+`✔️` Add Expense and Income
+
+`✔️` Show Total Balance
+
+`❌` Option to Extract data or Server ?
+
+`✔️` Option to add Bio Auth
+
+`✔️` Add Models For Data
+
+
+
+
 
 
 
