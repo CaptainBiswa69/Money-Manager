@@ -25,6 +25,8 @@ class _HomePageState extends State<HomePage> {
   DateTime day = DateTime.now();
   int choicevalue = DateTime.now().month - 1;
   String name = "";
+  String dropdownvalue = 'This Month';
+  String? customChoice = "";
 
   DateTimeRange dateTimeRange = DateTimeRange(
       start: DateTime(DateTime.now().year, DateTime.now().month - 1,
@@ -73,6 +75,14 @@ class _HomePageState extends State<HomePage> {
     "OCT",
     "NOV",
     "DEC"
+  ];
+
+  var ranges = [
+    'Today',
+    'This Month',
+    'Last Month',
+    'Overall',
+    'Custom',
   ];
 
   Future<List<TransactionModel>> fetch() async {
@@ -228,132 +238,41 @@ class _HomePageState extends State<HomePage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Transactions",
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                InkWell(
-                                  onTap: () {
-                                    openDialog(context);
-                                    setState(() {
-                                      choicevalue = 13;
-                                    });
-                                  },
-                                  child: const Icon(
-                                    CupertinoIcons.calendar_circle,
-                                    color: Static.PrimaryColor,
-                                    size: 40,
-                                  ),
-                                ),
-                                ChoiceChip(
-                                  labelPadding: EdgeInsets.all(2),
-                                  label: Text("Filter",
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        color: choicevalue == 100
-                                            ? Colors.white
-                                            : Colors.black,
-                                      )),
-                                  selected: choicevalue == 100 ? true : false,
-                                  selectedColor: Static.PrimaryColor,
-                                  onSelected: (val) {
-                                    if (val) {
-                                      setState(() {
-                                        choicevalue = 100;
-                                      });
-                                    }
-                                  },
-                                  elevation: 1,
-                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Text("1. Press calender to select range."),
-                        const Text("2. Press filter to see filtered data."),
-                        const Text("3. Longpress to delete.")
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        ChoiceChip(
-                          labelPadding: EdgeInsets.all(2),
-                          label: Text(month[day.month - 2],
-                              style: TextStyle(
-                                fontSize: 22,
-                                color: choicevalue == day.month - 2
-                                    ? Colors.white
-                                    : Colors.black,
-                              )),
-                          selected: choicevalue == day.month - 2 ? true : false,
-                          selectedColor: Static.PrimaryColor,
-                          onSelected: (val) {
-                            if (val) {
-                              setState(() {
-                                choicevalue = day.month - 2;
-                              });
-                            }
-                          },
-                          elevation: 1,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
+                        const Text(
+                          "Transactions",
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold),
                         ),
-                        ChoiceChip(
-                          labelPadding: EdgeInsets.all(2),
-                          label: Text(month[day.month - 1],
-                              style: TextStyle(
-                                fontSize: 22,
-                                color: choicevalue == day.month - 1
-                                    ? Colors.white
-                                    : Colors.black,
-                              )),
-                          selected: choicevalue == day.month - 1 ? true : false,
-                          selectedColor: Static.PrimaryColor,
-                          onSelected: (val) {
-                            if (val) {
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: DropdownButton(
+                            value: dropdownvalue,
+                            elevation: 5,
+                            style: TextStyle(
+                                fontSize: 18, color: Static.PrimaryColor),
+                            borderRadius: BorderRadius.circular(18),
+                            icon: const Icon(Icons.keyboard_arrow_down),
+                            items: ranges.map((String items) {
+                              return DropdownMenuItem(
+                                value: items,
+                                child: Text(items),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) async {
                               setState(() {
-                                choicevalue = day.month - 1;
+                                dropdownvalue = newValue!;
                               });
-                            }
-                          },
-                          elevation: 1,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
-                        ),
-                        ChoiceChip(
-                          labelPadding: EdgeInsets.all(2),
-                          label: Text("Overall",
-                              style: TextStyle(
-                                fontSize: 22,
-                                color: choicevalue == 13
-                                    ? Colors.white
-                                    : Colors.black,
-                              )),
-                          selected: choicevalue == 13 ? true : false,
-                          selectedColor: Static.PrimaryColor,
-                          onSelected: (val) {
-                            if (val) {
-                              setState(() {
-                                choicevalue = 13;
-                              });
-                            }
-                          },
-                          elevation: 1,
-                          padding: EdgeInsets.symmetric(horizontal: 5),
+                              if (newValue == 'Custom') {
+                                customChoice = await openDialog(context);
+                                setState(() {});
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
@@ -364,25 +283,8 @@ class _HomePageState extends State<HomePage> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         TransactionModel dataIndex = snapshot.data![index];
-                        if (dataIndex.date.month == choicevalue + 1) {
-                          if (dataIndex.type == "Income") {
-                            return incomeTile(dataIndex.amount, dataIndex.note,
-                                dataIndex.date, index);
-                          } else {
-                            return expenseTile(dataIndex.amount, dataIndex.note,
-                                dataIndex.date, index);
-                          }
-                        } else if (choicevalue == 13) {
-                          if (dataIndex.type == "Income") {
-                            return incomeTile(dataIndex.amount, dataIndex.note,
-                                dataIndex.date, index);
-                          } else {
-                            return expenseTile(dataIndex.amount, dataIndex.note,
-                                dataIndex.date, index);
-                          }
-                        } else if (choicevalue == 100) {
-                          print("${dataIndex.amount} ${dataIndex.date}");
-                          if (dateTimeRange.start == dataIndex.date) {
+                        if (dropdownvalue == 'This Month') {
+                          if (dataIndex.date.month == DateTime.now().month) {
                             if (dataIndex.type == "Income") {
                               return incomeTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
@@ -390,7 +292,11 @@ class _HomePageState extends State<HomePage> {
                               return expenseTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
                             }
-                          } else if (dateTimeRange.end == dataIndex.date) {
+                          } else {
+                            return Container();
+                          }
+                        } else if (dropdownvalue == 'Today') {
+                          if (dataIndex.date.day == DateTime.now().day) {
                             if (dataIndex.type == "Income") {
                               return incomeTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
@@ -398,15 +304,60 @@ class _HomePageState extends State<HomePage> {
                               return expenseTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
                             }
-                          } else if (dateTimeRange.start
-                                  .isBefore(dataIndex.date) &&
-                              dateTimeRange.end.isAfter(dataIndex.date)) {
+                          } else {
+                            return Container();
+                          }
+                        } else if (dropdownvalue == 'Last Month') {
+                          if (dataIndex.date.month ==
+                              DateTime.now().month - 1) {
                             if (dataIndex.type == "Income") {
                               return incomeTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
                             } else {
                               return expenseTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
+                            }
+                          } else {
+                            return Container();
+                          }
+                        } else if (dropdownvalue == 'Overall') {
+                          if (dataIndex.type == "Income") {
+                            return incomeTile(dataIndex.amount, dataIndex.note,
+                                dataIndex.date, index);
+                          } else {
+                            return expenseTile(dataIndex.amount, dataIndex.note,
+                                dataIndex.date, index);
+                          }
+                        } else if (dropdownvalue == 'Custom') {
+                          if (customChoice == "True" || customChoice == null) {
+                            if (dateTimeRange.start == dataIndex.date) {
+                              if (dataIndex.type == "Income") {
+                                return incomeTile(dataIndex.amount,
+                                    dataIndex.note, dataIndex.date, index);
+                              } else {
+                                return expenseTile(dataIndex.amount,
+                                    dataIndex.note, dataIndex.date, index);
+                              }
+                            } else if (dateTimeRange.end == dataIndex.date) {
+                              if (dataIndex.type == "Income") {
+                                return incomeTile(dataIndex.amount,
+                                    dataIndex.note, dataIndex.date, index);
+                              } else {
+                                return expenseTile(dataIndex.amount,
+                                    dataIndex.note, dataIndex.date, index);
+                              }
+                            } else if (dateTimeRange.start
+                                    .isBefore(dataIndex.date) &&
+                                dateTimeRange.end.isAfter(dataIndex.date)) {
+                              if (dataIndex.type == "Income") {
+                                return incomeTile(dataIndex.amount,
+                                    dataIndex.note, dataIndex.date, index);
+                              } else {
+                                return expenseTile(dataIndex.amount,
+                                    dataIndex.note, dataIndex.date, index);
+                              }
+                            } else {
+                              return Container();
                             }
                           } else {
                             return Container();
@@ -525,7 +476,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Container(
           padding: const EdgeInsets.all(5.0),
-          margin: const EdgeInsets.all(8.0),
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
           decoration: BoxDecoration(color: Colors.white60),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -608,7 +559,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Container(
           padding: const EdgeInsets.all(5.0),
-          margin: const EdgeInsets.all(8.0),
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
           decoration: BoxDecoration(color: Colors.white60),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -670,7 +621,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future openDialog(context) => showDialog(
+  openDialog(context) => showDialog(
         context: context,
         builder: (context) => StatefulBuilder(
           builder: (context, setState) => AlertDialog(
@@ -711,21 +662,11 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.green)),
-                child: const Text("yes"),
-              ),
-              ElevatedButton(
+              TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(false);
+                    Navigator.of(context).pop("True");
                   },
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.red)),
-                  child: const Text("No"))
+                  child: Text("SUBMIT"))
             ],
           ),
         ),
