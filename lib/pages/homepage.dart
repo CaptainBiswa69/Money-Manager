@@ -348,7 +348,9 @@ class _HomePageState extends State<HomePage> {
                               }
                             } else if (dateTimeRange.start
                                     .isBefore(dataIndex.date) &&
-                                dateTimeRange.end.isAfter(dataIndex.date)) {
+                                dateTimeRange.end
+                                    .add(Duration(days: 1))
+                                    .isAfter(dataIndex.date)) {
                               if (dataIndex.type == "Income") {
                                 return incomeTile(dataIndex.amount,
                                     dataIndex.note, dataIndex.date, index);
