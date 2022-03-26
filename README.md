@@ -31,8 +31,6 @@ Simple Money Manager to keep track of your transactions. This app helps you with
 
 `❌` Add Monthly limit and show How much has been spent Yet.
 
-`❌` Show Charts of Money Spent on each day
-
 `✔️` Add Expense and Income
 
 `✔️` Show Total Balance
