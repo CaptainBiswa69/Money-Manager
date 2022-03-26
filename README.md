@@ -4,7 +4,7 @@ Simple Money Manager to keep track of your transactions. This app helps you with
 
 # ScreenShots
 
-![alt text](https://github.com/CaptainBiswa69/Money-Manager/blob/master/Screenshot_1648316161.png?raw=true)
+![alt text](https://github.com/[CaptainBiswa69]/[Money-Manager]/blob/master/Screenshot_1648316161.png?raw=true)
 
 
 
