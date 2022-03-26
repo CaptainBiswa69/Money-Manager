@@ -1,7 +1,7 @@
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/myTheme.dart';
-import 'package:flutter_application_3/pages/homepage.dart';
+import 'package:flutter_application_3/pages/loading_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
@@ -12,7 +12,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -23,6 +22,6 @@ class MyApp extends StatelessWidget {
             backgroundColor: Colors.white,
             splash: Image.asset("assets/images/manager_R.gif"),
             splashIconSize: 300,
-            nextScreen: const HomePage()));
+            nextScreen: LoadingScreen()));
   }
 }

@@ -12,13 +12,15 @@ showConfirmDialog(BuildContext context, String title, String content) async {
                   Navigator.of(context).pop(true);
                 },
                 style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.red)),
+                    backgroundColor: MaterialStateProperty.all(Colors.green)),
                 child: const Text("yes"),
               ),
               ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.red)),
                   child: const Text("No"))
             ],
           ));

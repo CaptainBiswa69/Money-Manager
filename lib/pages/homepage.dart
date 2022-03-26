@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/controller/db_helper.dart';
 import 'package:flutter_application_3/models/transaction_model.dart';
+import 'package:flutter_application_3/pages/settings.dart';
 import 'package:flutter_application_3/static.dart' as Static;
 import 'package:flutter_application_3/pages/transaction_add.dart';
 import 'package:flutter_application_3/widgets/confirm_dialog.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -22,12 +24,12 @@ class _HomePageState extends State<HomePage> {
   int totalExpense = 0;
   DateTime day = DateTime.now();
   int choicevalue = DateTime.now().month - 1;
+  String name = "";
 
   DateTimeRange dateTimeRange = DateTimeRange(
       start: DateTime(DateTime.now().year, DateTime.now().month - 1,
           DateTime.now().day - 3),
-      end: DateTime.now());
-
+      end: DateTime.now().add(Duration(days: 2)));
   getTotalBalnace(List<TransactionModel> entireData) {
     totalIncome = 0;
     totalBalance = 0;
@@ -91,14 +93,15 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     box = Hive.box("Money");
+    _getName();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text(
-            "Money Manager",
+          title: Text(
+            "Hello, $name",
             style: TextStyle(color: Colors.white),
           ),
           actions: [
@@ -107,7 +110,15 @@ class _HomePageState extends State<HomePage> {
                 Icons.settings,
                 color: Colors.white,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => Settings()))
+                    .whenComplete(() {
+                  setState(() {
+                    _getName();
+                  });
+                });
+              },
             ),
           ]),
       backgroundColor: const Color(0xffe2e7ef),
@@ -143,47 +154,75 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
+                      horizontal: 10.0,
                       vertical: 12.0,
                     ),
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          gradient: const LinearGradient(colors: [
-                            Static.PrimaryColor,
-                            Colors.greenAccent
-                          ])),
-                      child: Column(
-                        children: [
-                          const Text(
-                            "Total Balance",
-                            style: TextStyle(
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side:
+                            BorderSide(color: Static.PrimaryColor, width: 1.5),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10.0),
+                              topRight: Radius.circular(10.0),
+                              bottomLeft: Radius.circular(10.0),
+                              bottomRight: Radius.circular(10.0),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.greenAccent,
+                                offset: const Offset(
+                                  5.0,
+                                  5.0,
+                                ),
+                                blurRadius: 10.0,
+                                spreadRadius: 2.0,
+                              ), //BoxShadow
+                              BoxShadow(
                                 color: Colors.white,
-                                fontSize: 28.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Rs $totalBalance",
-                              style: const TextStyle(
+                                offset: const Offset(0.0, 0.0),
+                                blurRadius: 0.0,
+                                spreadRadius: 0.0,
+                              ), //BoxShadow
+                            ],
+                            gradient: const LinearGradient(
+                                colors: [Static.PrimaryColor, Colors.green])),
+                        child: Column(
+                          children: [
+                            const Text(
+                              "Total Balance",
+                              style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 24.0,
+                                  fontSize: 32.0,
                                   fontWeight: FontWeight.bold),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              incomeCard(totalIncome.toString()),
-                              expenseCard(totalExpense.toString())
-                            ],
-                          )
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Rs $totalBalance",
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 50,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                incomeCard(totalIncome.toString()),
+                                expenseCard(totalExpense.toString())
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -205,7 +244,12 @@ class _HomePageState extends State<HomePage> {
                             Row(
                               children: [
                                 InkWell(
-                                  onTap: (() => openDialog(context)),
+                                  onTap: () {
+                                    openDialog(context);
+                                    setState(() {
+                                      choicevalue = 13;
+                                    });
+                                  },
                                   child: const Icon(
                                     CupertinoIcons.calendar_circle,
                                     color: Static.PrimaryColor,
@@ -213,9 +257,10 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 ChoiceChip(
+                                  labelPadding: EdgeInsets.all(2),
                                   label: Text("Filter",
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 22,
                                         color: choicevalue == 100
                                             ? Colors.white
                                             : Colors.black,
@@ -229,6 +274,8 @@ class _HomePageState extends State<HomePage> {
                                       });
                                     }
                                   },
+                                  elevation: 1,
+                                  padding: EdgeInsets.symmetric(horizontal: 5),
                                 ),
                               ],
                             ),
@@ -246,9 +293,10 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ChoiceChip(
+                          labelPadding: EdgeInsets.all(2),
                           label: Text(month[day.month - 2],
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 22,
                                 color: choicevalue == day.month - 2
                                     ? Colors.white
                                     : Colors.black,
@@ -262,11 +310,14 @@ class _HomePageState extends State<HomePage> {
                               });
                             }
                           },
+                          elevation: 1,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                         ),
                         ChoiceChip(
+                          labelPadding: EdgeInsets.all(2),
                           label: Text(month[day.month - 1],
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 22,
                                 color: choicevalue == day.month - 1
                                     ? Colors.white
                                     : Colors.black,
@@ -280,11 +331,14 @@ class _HomePageState extends State<HomePage> {
                               });
                             }
                           },
+                          elevation: 1,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                         ),
                         ChoiceChip(
+                          labelPadding: EdgeInsets.all(2),
                           label: Text("Overall",
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 22,
                                 color: choicevalue == 13
                                     ? Colors.white
                                     : Colors.black,
@@ -298,6 +352,8 @@ class _HomePageState extends State<HomePage> {
                               });
                             }
                           },
+                          elevation: 1,
+                          padding: EdgeInsets.symmetric(horizontal: 5),
                         ),
                       ],
                     ),
@@ -308,21 +364,6 @@ class _HomePageState extends State<HomePage> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         TransactionModel dataIndex = snapshot.data![index];
-                        // if (dataIndex.type == "Income") {
-                        //   if (dataIndex.date.month == choicevalue + 1) {
-                        //     return incomeTile(dataIndex.amount, dataIndex.note,
-                        //         dataIndex.date, index);
-                        //   } else {
-                        //     return const Text("No data");
-                        //   }
-                        // } else {
-                        //   if (dataIndex.date.month == choicevalue + 1) {
-                        //     return expenseTile(dataIndex.amount, dataIndex.note,
-                        //         dataIndex.date, index);
-                        //   } else {
-                        //     return const Text("No data");
-                        //   }
-                        // }
                         if (dataIndex.date.month == choicevalue + 1) {
                           if (dataIndex.type == "Income") {
                             return incomeTile(dataIndex.amount, dataIndex.note,
@@ -340,8 +381,16 @@ class _HomePageState extends State<HomePage> {
                                 dataIndex.date, index);
                           }
                         } else if (choicevalue == 100) {
-                          if (dateTimeRange.start == dataIndex.date ||
-                              dateTimeRange.end == dataIndex.date) {
+                          print("${dataIndex.amount} ${dataIndex.date}");
+                          if (dateTimeRange.start == dataIndex.date) {
+                            if (dataIndex.type == "Income") {
+                              return incomeTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            } else {
+                              return expenseTile(dataIndex.amount,
+                                  dataIndex.note, dataIndex.date, index);
+                            }
+                          } else if (dateTimeRange.end == dataIndex.date) {
                             if (dataIndex.type == "Income") {
                               return incomeTile(dataIndex.amount,
                                   dataIndex.note, dataIndex.date, index);
@@ -468,68 +517,74 @@ class _HomePageState extends State<HomePage> {
           setState(() {});
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(10.0),
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-            color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(children: [
-              const Icon(
-                CupertinoIcons.arrow_down_circle,
-                color: Colors.green,
-                size: 30,
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Income",
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "${date.day} ${months[date.month - 1]} ${date.year}",
-                    style: const TextStyle(
-                        color: Colors.green,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ]),
-            Row(
-              children: [
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          side: BorderSide(color: Static.PrimaryColor, width: 1.5),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          margin: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(color: Colors.white60),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                const Icon(
+                  CupertinoIcons.arrow_down_circle,
+                  color: Colors.green,
+                  size: 30,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("+ $value",
-                        style: const TextStyle(
-                            color: Colors.green,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold)),
+                    const Text(
+                      "Income",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(
                       height: 5,
                     ),
                     Text(
-                      note,
-                      style: const TextStyle(fontSize: 15),
+                      "${date.day} ${months[date.month - 1]} ${date.year}",
+                      style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
-                )
-              ],
-            )
-          ],
+                ),
+              ]),
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Text("+ $value",
+                          style: const TextStyle(
+                              color: Colors.green,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        note,
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ],
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -545,65 +600,71 @@ class _HomePageState extends State<HomePage> {
           setState(() {});
         }
       },
-      child: Container(
-        padding: const EdgeInsets.all(10.0),
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-            color: Colors.white60, borderRadius: BorderRadius.circular(18.0)),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(children: [
-              const Icon(
-                CupertinoIcons.arrow_up_circle,
-                color: Colors.red,
-                size: 30,
-              ),
-              const SizedBox(
-                width: 5,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Expense",
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    "${date.day} ${months[date.month - 1]} ${date.year}",
-                    style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ]),
-            Row(
-              children: [
+      child: Card(
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+          side: BorderSide(color: Static.PrimaryColor, width: 1.5),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          margin: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(color: Colors.white60),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(children: [
+                const Icon(
+                  CupertinoIcons.arrow_up_circle,
+                  color: Colors.red,
+                  size: 30,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("- $value",
-                        style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold)),
+                    const Text(
+                      "Expense",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(
                       height: 5,
                     ),
-                    Text(note, style: const TextStyle(fontSize: 15)),
+                    Text(
+                      "${date.day} ${months[date.month - 1]} ${date.year}",
+                      style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ],
-                )
-              ],
-            )
-          ],
+                ),
+              ]),
+              Row(
+                children: [
+                  Column(
+                    children: [
+                      Text("- $value",
+                          style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(note, style: const TextStyle(fontSize: 15)),
+                    ],
+                  )
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -655,16 +716,25 @@ class _HomePageState extends State<HomePage> {
                   Navigator.of(context).pop(true);
                 },
                 style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.red)),
+                    backgroundColor: MaterialStateProperty.all(Colors.green)),
                 child: const Text("yes"),
               ),
               ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.red)),
                   child: const Text("No"))
             ],
           ),
         ),
       );
+
+  void _getName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString("Name")!;
+    });
+  }
 }
